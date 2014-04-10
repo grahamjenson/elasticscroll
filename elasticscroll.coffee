@@ -4,14 +4,14 @@ qhttp = require 'q-io/http'
 
 class ElasticScroll
 
-  constructor: (@query, @process_fn) ->
+  constructor: (@url, @query, @process_fn) ->
     @scroll_id = null
 
   set_scroll_id: ->
     request = {
       method: "POST"
       body: [JSON.stringify(@query)]
-      url: 'http://localhost:19201/_search?search_type=scan&scroll=10m&size=100'
+      url: "#{@url}/_search?search_type=scan&scroll=10m&size=100"
     }
 
     qhttp.request(request)
@@ -35,14 +35,13 @@ class ElasticScroll
 
   continue_scroll: (hits) ->
     if hits.length > 0
-      get_next_set()
+      @get_next_set()
       .then( (hits) => @process_hits(hits))
       .then( (hits) => @continue_scroll(hits))
     else 
       console.error("FINISHED")
 
-  scroll_query: ->
-
+  scroll: ->
     Q.fcall(-> console.error "STARTING")
     .then( => @set_scroll_id(@query))
     .then( => @get_next_set())
