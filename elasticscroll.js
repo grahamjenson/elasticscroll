@@ -38,7 +38,7 @@
       process.stderr.write(".");
       request = {
         method: "GET",
-        url: "http://localhost:19201/_search/scroll/" + this.scroll_id + "?scroll=10m"
+        url: "" + this.url + "/_search/scroll/" + this.scroll_id + "?scroll=10m"
       };
       return qhttp.request(request).then(function(response) {
         return response.body.read();

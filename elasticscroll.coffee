@@ -23,7 +23,7 @@ class ElasticScroll
     process.stderr.write(".");
     request = {
       method: "GET"
-      url: "http://localhost:19201/_search/scroll/#{@scroll_id}?scroll=10m"
+      url: "#{@url}/_search/scroll/#{@scroll_id}?scroll=10m"
     }
     qhttp.request(request)
     .then((response) -> response.body.read())
