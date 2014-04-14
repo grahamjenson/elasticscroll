@@ -34,12 +34,11 @@ class ElasticScroll
     (@process_fn(hit) for hit in hits)
 
   continue_scroll: (hits) ->
-    if hits.length > 0
-      @get_next_set()
-      .then( (hits) => @process_hits(hits))
-      .then( (hits) => @continue_scroll(hits))
-    else 
-      console.error("FINISHED")
+   return if hits.length == 0
+   
+   @get_next_set()
+   .then( (hits) => @process_hits(hits))
+   .then( (hits) => @continue_scroll(hits))
 
   scroll: ->
     Q.fcall(-> console.error "STARTING")
