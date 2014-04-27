@@ -16,4 +16,4 @@ es = new ElasticScroll("http://localhost:9200", query, print_to_console)
 es.scroll().fail(console.log)
 ```
 
-Please read the explination of how this works at [maori.geek](http://maori.geek.nz).
+Please read the explination of how this works at [maori.geek](http://maori.geek.nz/post/scroll_elasticsearch_using_promises_and_node_js).
