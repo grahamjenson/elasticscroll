@@ -1,7 +1,7 @@
 
 Q = require 'q'
 qhttp = require 'q-io/http'
-
+url = require 'url'
 class ElasticScroll
 
   constructor: (@url, @query, @process_fn) ->
@@ -21,9 +21,11 @@ class ElasticScroll
 
   get_next_set: () ->
     process.stderr.write(".");
+    parsed_url = url.parse(@url)
+    host_name = "#{parsed_url.protocol}//#{parsed_url.host}"
     request = {
       method: "GET"
-      url: "#{@url}/_search/scroll/#{@scroll_id}?scroll=10m"
+      url: "#{host_name}/_search/scroll/#{@scroll_id}?scroll=10m"
     }
     qhttp.request(request)
     .then((response) -> response.body.read())
