@@ -20,13 +20,13 @@ class ElasticScroll
     process.stderr.write(".");
     request({
       method: "GET"
-      url: "#{@hostname}/_search/scroll/#{@scroll_id}?scroll=10m"
+      url: "#{@hostname}/_search/scroll/#{@scroll_id}?scroll=60m"
     })
     .then((resp) -> JSON.parse(resp.body))
     .then((json) -> json.hits.hits)
 
   process_hits: (hits) ->
-    (@process_fn(hit) for hit in hits)
+    Promise.all (@process_fn(hit) for hit in hits)
 
   continue_scroll: (hits) ->
    return if hits.length == 0
