@@ -2,10 +2,10 @@
 
 This is a module that implements the [scrolling api for Elasticsearch](http://www.elasticsearch.org/guide/en/elasticsearch/reference/current/search-request-scroll.html).
 
-To use this module 
+To use this module
 
 ```coffeescript
-ElasticScroll = require './elasticscroll'
+ElasticScroll = require 'elasticscroll'
 
 query = {"query": {"term" : "bla"}}
 
