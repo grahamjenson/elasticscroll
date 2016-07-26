@@ -1,2 +1,2 @@
 require('coffee-script/register')
-require('../commands/cf-build')()
+module.exports = require('./elasticscroll.coffee')

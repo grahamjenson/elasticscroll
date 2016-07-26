@@ -1,35 +1,28 @@
-
-Q = require 'q'
-qhttp = require 'q-io/http'
+Promise = require 'bluebird'
+request = Promise.promisify(require 'request')
 url = require 'url'
+
 class ElasticScroll
 
-  constructor: (@url, @query, @process_fn) ->
+  constructor: (@hostname, @index, @query, @process_fn) ->
     @scroll_id = null
 
   set_scroll_id: ->
-    request = {
+    request({
       method: "POST"
-      body: [JSON.stringify(@query)]
-      url: "#{@url}/_search?search_type=scan&scroll=10m&size=100"
-    }
-
-    qhttp.request(request)
-    .then((response) -> response.body.read())
-    .then((resp) -> JSON.parse(resp.toString()))
+      body: JSON.stringify(@query)
+      url: "#{@hostname}/#{@index}/_search?search_type=scan&scroll=60m&size=1000"
+    })
+    .then((resp) -> JSON.parse(resp.body))
     .then((json) => console.error "TOTAL:", json.hits.total; @scroll_id = json._scroll_id)
 
   get_next_set: () ->
     process.stderr.write(".");
-    parsed_url = url.parse(@url)
-    host_name = "#{parsed_url.protocol}//#{parsed_url.host}"
-    request = {
+    request({
       method: "GET"
-      url: "#{host_name}/_search/scroll/#{@scroll_id}?scroll=10m"
-    }
-    qhttp.request(request)
-    .then((response) -> response.body.read())
-    .then((resp) -> JSON.parse(resp.toString()))
+      url: "#{@hostname}/_search/scroll/#{@scroll_id}?scroll=10m"
+    })
+    .then((resp) -> JSON.parse(resp.body))
     .then((json) -> json.hits.hits)
 
   process_hits: (hits) ->
@@ -37,22 +30,18 @@ class ElasticScroll
 
   continue_scroll: (hits) ->
    return if hits.length == 0
-   
+
    @get_next_set()
    .then( (hits) => @process_hits(hits))
    .then( (hits) => @continue_scroll(hits))
 
   scroll: ->
-    Q.fcall(-> console.error "STARTING")
-    .then( => @set_scroll_id(@query))
+    console.log "Starting"
+    @set_scroll_id(@query)
     .then( => @get_next_set())
     .then( (hits) => @process_hits(hits))
     .then( (hits) => @continue_scroll(hits))
 
 
-#AMD
-if (typeof define != 'undefined' && define.amd)
-  define([], -> return ElasticScroll)
-#Node
-else if (typeof module != 'undefined' && module.exports)
-    module.exports = ElasticScroll;
+module.exports = ElasticScroll
+
