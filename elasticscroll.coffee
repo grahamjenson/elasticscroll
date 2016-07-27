@@ -26,14 +26,15 @@ class ElasticScroll
     .then((json) -> json.hits.hits)
 
   process_hits: (hits) ->
-    Promise.all (@process_fn(hit) for hit in hits)
+    Promise.all((@process_fn(hit) for hit in hits))
+    .then( -> hits)
 
   continue_scroll: (hits) ->
-   return if hits.length == 0
+    return if hits.length == 0
 
-   @get_next_set()
-   .then( (hits) => @process_hits(hits))
-   .then( (hits) => @continue_scroll(hits))
+    @get_next_set()
+    .then( (hits) => @process_hits(hits))
+    .then( (hits) => @continue_scroll(hits))
 
   scroll: ->
     console.log "Starting"
