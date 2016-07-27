@@ -4,14 +4,14 @@ url = require 'url'
 
 class ElasticScroll
 
-  constructor: (@hostname, @index, @query, @process_fn) ->
+  constructor: (@hostname, @index, @scroll_size, @query, @process_fn) ->
     @scroll_id = null
 
   set_scroll_id: ->
     request({
       method: "POST"
       body: JSON.stringify(@query)
-      url: "#{@hostname}/#{@index}/_search?search_type=scan&scroll=60m&size=1000"
+      url: "#{@hostname}/#{@index}/_search?search_type=scan&scroll=60m&size=#{@scroll_size}"
     })
     .then((resp) -> JSON.parse(resp.body))
     .then((json) => console.error "TOTAL:", json.hits.total; @scroll_id = json._scroll_id)
@@ -26,7 +26,7 @@ class ElasticScroll
     .then((json) -> json.hits.hits)
 
   process_hits: (hits) ->
-    Promise.all((@process_fn(hit) for hit in hits))
+    Promise.try( => @process_fn(hits))
     .then( -> hits)
 
   continue_scroll: (hits) ->
